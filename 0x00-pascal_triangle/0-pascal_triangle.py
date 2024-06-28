@@ -1,4 +1,8 @@
 #!/usr/bin/python3
+"""
+This module contains a function to return the pascal triangle of a given size
+"""
+
 
 def pascal_triangle(n):
     """
@@ -7,18 +11,26 @@ def pascal_triangle(n):
     Parameters:
     n (int): The number of rows in Pascal's triangle to generate.
 
-    Returns:
-    List[List[int]]: list of lists of integers representing Pascal's triangle
-                     Returns an empty list if n <= 0.
+    Returns a list of lists of integers representing the Pascal's triangle of n
     """
     if n <= 0:
         return []
 
-    triangle = []
-    for i in range(n):
-        row = [1] * (i + 1)
-        for j in range(1, i):
-            row[j] = triangle[i - 1][j - 1] + triangle[i - 1][j]
-        triangle.append(row)
+    pascal = [[1]]
+    top_row = [1]
 
-    return triangle
+    for i in range(n - 1):
+        new_row = []
+        for j in range(len(top_row) + 1):
+            if j > 0:
+                left = top_row[j - 1]
+            else:
+                left = 0
+            if j < len(top_row):
+                right = top_row[j]
+            else:
+                right = 0
+            new_row.append(left + right)
+        pascal.append(new_row)
+        top_row = new_row
+    return pascal
