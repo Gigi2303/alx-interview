@@ -2,51 +2,41 @@
 
 const https = require('https');
 
-// Function to fetch data from a URL
-const fetchData = (url) => {
-  return new Promise((resolve, reject) => {
-    https.get(url, (res) => {
-      let data = '';
-      res.on('data', (chunk) => {
-        data += chunk;
-      });
-      res.on('end', () => {
-        resolve(JSON.parse(data));
-      });
-    }).on('error', (err) => {
-      reject(err);
-    });
-  });
-};
-
-// Function to get and print characters of a Star Wars movie
-const getStarWarsCharacters = async (movieId) => {
-  try {
-    // Base URL for the Star Wars API film endpoint
-    const filmUrl = `https://swapi.dev/api/films/${movieId}/`;
-
-    // Fetch the film data
-    const filmData = await fetchData(filmUrl);
-
-    // Get the list of character URLs
-    const characterUrls = filmData.characters;
-
-    // Fetch and print each character's name
-    for (const url of characterUrls) {
-      const characterData = await fetchData(url);
-      console.log(characterData.name);
-    }
-  } catch (error) {
-    console.error(`An error occurred: ${error.message}`);
-  }
-};
-
-// Main script execution
 const movieId = process.argv[2];
+
 if (!movieId) {
-  console.error('Usage: node script.js <Movie ID>');
-  process.exit(1);
+    console.error('Please provide a movie ID as the first argument.');
+    process.exit(1);
 }
 
-getStarWarsCharacters(movieId);
+const apiUrl = `https://swapi.dev/api/films/${movieId}/`;
 
+https.get(apiUrl, (res) => {
+    let data = '';
+
+    res.on('data', (chunk) => {
+        data += chunk;
+    });
+
+    res.on('end', () => {
+        const film = JSON.parse(data);
+        const characters = film.characters;
+
+        characters.forEach((characterUrl) => {
+            https.get(characterUrl, (res) => {
+                let charData = '';
+
+                res.on('data', (chunk) => {
+                    charData += chunk;
+                });
+
+                res.on('end', () => {
+                    const character = JSON.parse(charData);
+                    console.log(character.name);
+                });
+            });
+        });
+    });
+}).on('error', (err) => {
+    console.error('Error fetching the movie:', err.message);
+});
