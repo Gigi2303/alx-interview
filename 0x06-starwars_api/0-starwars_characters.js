@@ -1,3 +1,5 @@
+#!/usr/bin/node
+
 const https = require('https');
 
 // Function to fetch data from a URL
